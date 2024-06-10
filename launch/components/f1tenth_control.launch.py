@@ -57,7 +57,7 @@ def launch_setup(context, *args, **kwargs):
         name='controller_node_exe',
         namespace='trajectory_follower',
         remappings=[
-            ('~/input/reference_trajectory', '/planning/racing_planner/trajectory'),
+            ('~/input/reference_trajectory', '/planning/racing_planner/avoidance/trajectory'),
             ('~/input/current_odometry', '/localization/kinematic_state'),
             ('~/input/current_steering', '/vehicle/status/steering_status'),
             ('~/input/current_accel', '/localization/acceleration'),
@@ -200,6 +200,12 @@ def launch_setup(context, *args, **kwargs):
         name='glog_component'
     )
 
+    obstacle_avoidance = ComposableNode(
+        package='obstacle_avoidance_node',
+        plugin='obstacle_avoidance::ObstacleAvoidance',
+        name='obstacle_avoidance_node'
+    )
+
     # set container to run all required components in the same process
     container = ComposableNodeContainer(
         name='control_container',
@@ -212,15 +218,26 @@ def launch_setup(context, *args, **kwargs):
             shift_decider_component,
             vehicle_cmd_gate_component,
             operation_mode_transition_manager_component,
-            glog_component
-        ]
+            glog_component,
+            obstacle_avoidance
+        ],
+        output='screen'
     )
+
+    obstacle_detection_node = Node(
+        package='obstacle_avoidance_node',
+        executable='obstacle_detection.py',
+        name='obstacle_detection',
+        output='screen'
+    )
+
 
     group = GroupAction(
         [
             PushRosNamespace('control'),
             container,
-            external_cmd_selector_loader
+            external_cmd_selector_loader,
+            obstacle_detection_node
         ]
     )
 

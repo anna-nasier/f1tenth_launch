@@ -110,7 +110,8 @@ def launch_setup(context, *args, **kwargs):
     )
 
     # TODO(amadeuszsz): integrate perception pipeline
-    # Perception
+    # Perception 
+    # in f1tenth_control.launch.py
 
     # Planning
     planning_launch = IncludeLaunchDescription(
